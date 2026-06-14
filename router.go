@@ -145,6 +145,10 @@ func (r *router) Get(path string, c routeCallback) {
 	r.registerRoute("GET", path, c)
 }
 
+func (r *router) Post(path string, c routeCallback) {
+	r.registerRoute("POST", path, c)
+}
+
 // função principal que recebe uma requisição crua e a direciona
 func (r *router) Receive(rawHTTP string) {
 	request, err := DecodeHTTPRequest(rawHTTP)
