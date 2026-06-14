@@ -42,7 +42,7 @@ func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
 		}
 
 		// removendo possíveis espaços
-		key := strings.TrimSpace(parts[0])
+		key := strings.ToLower(strings.TrimSpace(parts[0])) // campos do header são case-insensitive (RFC 9110 §5.1)
 		value := strings.TrimSpace(parts[1])
 
 		headers[key] = value
