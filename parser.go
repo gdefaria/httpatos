@@ -10,6 +10,7 @@ type HTTPRequest struct {
 	Path    string
 	Version string
 	Headers map[string]string
+	Params  map[string]string
 	Body    []byte
 }
 
