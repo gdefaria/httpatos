@@ -198,7 +198,7 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	// construindo o contexto
 	c := &Context{
 		Request:  request,
-		Response: NewHTTPResponse(),
+		Response: newHTTPResponse(),
 	}
 
 	request.Params = params
@@ -211,7 +211,7 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	}()
 
 	callback(c)
-	for !c.Response.Ready {
+	for !c.Response.ready {
 	} // espera até que Request.Ready == true
 
 	return c.Response.serialize()

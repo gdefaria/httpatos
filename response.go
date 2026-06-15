@@ -103,7 +103,7 @@ func (r *httpResponse) serialize() []byte {
 	var buf bytes.Buffer
 
 	// status line
-	fmt.Fprintf(&buf, "HTTP/1.1 %d %s\r\n", r.Status, r.statusText)
+	fmt.Fprintf(&buf, "HTTP/1.1 %d %s\r\n", r.status, r.statusText)
 
 	// headers
 	for key, value := range r.Headers {
@@ -119,7 +119,7 @@ func (r *httpResponse) serialize() []byte {
 	return buf.Bytes()
 }
 
-func NewHTTPResponse() *httpResponse {
+func newHTTPResponse() *httpResponse {
 	return &httpResponse{
 		Headers: make(map[string]string),
 	}
