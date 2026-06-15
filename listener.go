@@ -1,4 +1,4 @@
-package main
+package httpatos
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ func (l *Listener) handleConnection(conn net.Conn) {
 	n, err := conn.Read(buf)
 
 	if err != nil {
-		fmt.Printf("Failed to read connection: %w\n", err)
+		fmt.Printf("Failed to read connection: %v\n", err)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (l *Listener) Listen() {
 	for {
 		conn, err := tcpListener.Accept()
 		if err != nil {
-			fmt.Printf("Failed to accept client connection: %w\n", err)
+			fmt.Printf("Failed to accept client connection: %v\n", err)
 			continue
 		}
 
