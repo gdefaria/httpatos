@@ -78,20 +78,24 @@ func (r *httpResponse) Status(status int) *httpResponse {
 	return r
 }
 
-func (r *httpResponse) Send(statusCode int) {
-	var message string
+func (r *httpResponse) Send() {
+	// ajustando Content-Length
+	r.Headers["Content-Length"] = strconv.Itoa(len(r.Body))
 
-	if text, ok := statusText[statusCode]; ok {
+	// 200 como status padrão
+	if r.status == 0 {
+		r.status = 200
+	}
+
+	// status text
+	var message string
+	if text, ok := statusText[r.status]; ok {
 		message = text
 	} else {
 		message = "Unknown"
 	}
 
 	r.statusText = message
-	r.status = statusCode
-
-	r.Headers["Content-Length"] = strconv.Itoa(len(r.Body))
-
 	r.ready = true
 }
 
