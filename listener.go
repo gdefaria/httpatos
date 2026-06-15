@@ -2,6 +2,7 @@ package httpatos
 
 import (
 	"fmt"
+	"io"
 	"net"
 )
 
@@ -26,6 +27,11 @@ func (l *listener) handleConnection(conn net.Conn) {
 	buf := make([]byte, 5_000_000)
 
 	n, err := conn.Read(buf)
+
+	if err == io.EOF {
+		// sem mais dados para ler
+		return
+	}
 
 	if err != nil {
 		fmt.Printf("Failed to read connection: %v\n", err)
