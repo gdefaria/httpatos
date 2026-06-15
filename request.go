@@ -16,7 +16,7 @@ type httpRequest struct {
 }
 
 // Parser de JSON
-func (r *httpRequest) JSON(expectedPayload any) (success bool) {
+func (r *httpRequest) Json(expectedPayload any) (success bool) {
 	contentType := r.Headers["content-type"]
 
 	if contentType != "application/json" {
