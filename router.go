@@ -11,7 +11,7 @@ var ALLOWED_METHODS = [...]string{"GET", "POST"}
 type routeCallback func(context *HTTPContext)
 
 type HTTPContext struct {
-	Request *HTTPRequest
+	Request  *HTTPRequest
 	Response *HTTPResponse
 }
 
@@ -54,9 +54,9 @@ func NewRouter() *router {
 }
 
 /*
- função responsável por mapear a rota+parâmetros na árvore de rotas do método.
- tenha certeza que entendeu a estrutura de TrieNode antes de ler essa função.
- você pode me perguntar pessoalmente caso não entenda.
+função responsável por mapear a rota+parâmetros na árvore de rotas do método.
+tenha certeza que entendeu a estrutura de TrieNode antes de ler essa função.
+você pode me perguntar pessoalmente caso não entenda.
 */
 func (r *router) registerRoute(method string, path string, c routeCallback) {
 	segments := strings.Split(path, "/")
@@ -101,7 +101,7 @@ func (r *router) registerRoute(method string, path string, c routeCallback) {
 			// caso seja parâmetro
 			node.paramChild = newNode
 			node.paramName = segment[1:]
-		} else { 
+		} else {
 			// caso seja rota literal
 			node.children[segment] = newNode
 		}
@@ -121,7 +121,7 @@ func (r *router) matchRoute(method string, path string) (routeCallback, map[stri
 	segments := strings.Split(path, "/")
 	node := r.routeTree[method]
 
-	for _, segment := range(segments[1:]) {
+	for _, segment := range segments[1:] {
 		if len(segment) == 0 {
 			// é apenas uma barra `/`. então deve dar fallback para o path sem a barra
 			continue
@@ -151,7 +151,6 @@ func (r *router) matchRoute(method string, path string) (routeCallback, map[stri
 	return node.callback, params
 }
 
-
 /* MÉTODOS */
 func (r *router) Get(path string, c routeCallback) {
 	r.registerRoute("GET", path, c)
@@ -160,7 +159,6 @@ func (r *router) Get(path string, c routeCallback) {
 func (r *router) Post(path string, c routeCallback) {
 	r.registerRoute("POST", path, c)
 }
-
 
 // função principal que recebe uma requisição crua e a direciona
 func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
@@ -199,7 +197,7 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 
 	// construindo o contexto
 	c := &HTTPContext{
-		Request: request,
+		Request:  request,
 		Response: NewHTTPResponse(),
 	}
 
@@ -213,7 +211,8 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	}()
 
 	callback(c)
-	for !c.Response.Ready {} // espera até que Request.Ready == true
+	for !c.Response.Ready {
+	} // espera até que Request.Ready == true
 
 	return c.Response.Serialize()
 }

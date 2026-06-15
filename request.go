@@ -83,6 +83,6 @@ func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
 		Path:    path,
 		Version: version,
 		Headers: headers,
-		Body:    body, 
+		Body:    body,
 	}, nil
 }

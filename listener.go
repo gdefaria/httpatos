@@ -8,13 +8,13 @@ import (
 type onReceiveCallback func(rawRequest []byte) (rawResponse []byte)
 
 type Listener struct {
-	Port int
+	Port      int
 	OnReceive onReceiveCallback
 }
 
 func NewListener(port int, onReceive onReceiveCallback) *Listener {
 	return &Listener{
-		Port: port,
+		Port:      port,
 		OnReceive: onReceive,
 	}
 }
