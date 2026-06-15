@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-var ALLOWED_METHODS = [...]string{"GET", "POST"}
+var ALLOWED_METHODS = [...]string{"GET", "POST", "PUT", "PATCH", "DELETE"}
 
 // callback que recebe o contexto da requisição
 type routeCallback func(context *Context)
