@@ -1,7 +1,7 @@
 
 # httpatos
 
-Biblioteca HTTP minimalista para Go, escrita do zero para meu [patos-psel](github.com/gdefaria/patos-psel). Suporta roteamento por método, parâmetros de rota dinâmicos, parsing de JSON no body e controle total sobre a resposta.
+Biblioteca HTTP minimalista para Go, escrita do zero para meu [patos-psel](https://github.com/gdefaria/patos-psel). Suporta roteamento por método, parâmetros de rota dinâmicos, parsing de JSON no body e controle total sobre a resposta.
 > Biblioteca escrita para fins de aprendizagem, não utilize em produção.
 
 ---
