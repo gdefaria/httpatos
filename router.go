@@ -164,10 +164,15 @@ func (r *router) Post(path string, c routeCallback) {
 func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	request, err := decodeHttpRequest(string(rawRequest))
 
+	// construindo o contexto
+	c := &Context{
+		Request:  request,
+		Response: newHTTPResponse(),
+	}
+
 	if err != nil {
-		// TODO: Handle bad request
-		fmt.Println("Bad Request")
-		return
+		c.Response.Status(400).Send()
+		return c.Response.serialize()
 	}
 
 	// verificando se o método é permitido
@@ -181,31 +186,23 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	}
 
 	if !isMethodAllowed {
-		// TODO: Handle bad method
-		fmt.Println("Bad method:", request.Method)
-		return
+		c.Response.Status(400).Send()
+		return c.Response.serialize()
 	}
 
 	// buscando o callback + parâmetros
 	callback, params := r.matchRoute(request.Method, request.Path)
 
 	if callback == nil {
-		// TODO: Handle route not found
-		fmt.Println("Route not found:", request.Path)
-		return
-	}
-
-	// construindo o contexto
-	c := &Context{
-		Request:  request,
-		Response: newHTTPResponse(),
+		c.Response.Status(404).Send()
+		return c.Response.serialize()
 	}
 
 	request.Params = params
 
 	defer func() {
 		if p := recover(); p != nil {
-			// TODO: Handle internal server error
+			c.Response.Status(500).Send()
 			fmt.Printf("[Internal Server Error]: %v", p)
 		}
 	}()
