@@ -7,13 +7,13 @@ import (
 
 var ALLOWED_METHODS = [...]string{"GET", "POST"}
 
-// contexto inclui a requisição e métodos para a resposta
-type HTTPContext struct {
-	Request *HTTPRequest
-}
-
 // callback que recebe o contexto da requisição
 type routeCallback func(context *HTTPContext)
+
+type HTTPContext struct {
+	Request *HTTPRequest
+	Response *HTTPResponse
+}
 
 /*
 cada nó representa um segmento do path. por exemplo, a rota
@@ -70,6 +70,12 @@ func (r *router) registerRoute(method string, path string, c routeCallback) {
 
 	for i := 1; i < len(segments); i++ {
 		segment := segments[i]
+
+		if len(segment) == 0 {
+			// é uma barra no final do path, como `/path/`, que deve dar fallback para `/path`
+			continue
+		}
+
 		isParam := segment[0] == ':'
 
 		// verifica se já existe um segmento caso seja rota literal
@@ -116,6 +122,11 @@ func (r *router) matchRoute(method string, path string) (routeCallback, map[stri
 	node := r.routeTree[method]
 
 	for _, segment := range(segments[1:]) {
+		if len(segment) == 0 {
+			// é apenas uma barra `/`. então deve dar fallback para o path sem a barra
+			continue
+		}
+
 		// buscando um node literal (prioridade)
 		literalChild := node.children[segment]
 
@@ -140,6 +151,7 @@ func (r *router) matchRoute(method string, path string) (routeCallback, map[stri
 	return node.callback, params
 }
 
+
 /* MÉTODOS */
 func (r *router) Get(path string, c routeCallback) {
 	r.registerRoute("GET", path, c)
@@ -149,9 +161,10 @@ func (r *router) Post(path string, c routeCallback) {
 	r.registerRoute("POST", path, c)
 }
 
+
 // função principal que recebe uma requisição crua e a direciona
-func (r *router) Receive(rawHTTP string) {
-	request, err := DecodeHTTPRequest(rawHTTP)
+func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
+	request, err := DecodeHTTPRequest(string(rawRequest))
 
 	if err != nil {
 		// TODO: Handle bad request
@@ -185,20 +198,28 @@ func (r *router) Receive(rawHTTP string) {
 	}
 
 	// construindo o contexto
-	ctx := &HTTPContext{
+	c := &HTTPContext{
 		Request: request,
+		Response: NewHTTPResponse(),
 	}
 
 	request.Params = params
 
-	go func() {
-		defer func() {
-			if p := recover(); p != nil {
-				// TODO: Handle internal server error
-				fmt.Println("INTERNAL SERVER ERROR:", p)
-			}
-		}()
-
-		callback(ctx)
+	defer func() {
+		if p := recover(); p != nil {
+			// TODO: Handle internal server error
+			fmt.Println(fmt.Sprintf("[Internal Server Error]: %v", p))
+		}
 	}()
+
+	callback(c)
+	for !c.Response.Ready {} // espera até que Request.Ready == true
+
+	return c.Response.Serialize()
+}
+
+// cria um novo listener
+func (r *router) Listen(port int) {
+	listener := NewListener(port, r.receiveRawRequest)
+	listener.Listen()
 }

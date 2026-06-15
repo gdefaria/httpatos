@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -12,6 +13,28 @@ type HTTPRequest struct {
 	Headers map[string]string
 	Params  map[string]string
 	Body    []byte
+}
+
+// Parser de JSON
+func (r *HTTPRequest) JSON(expectedPayload any) (success bool) {
+	contentType := r.Headers["content-type"]
+
+	if contentType != "application/json" {
+		// TODO: handle bad request
+		fmt.Println("Bad content-type. Expected application/json")
+		return false
+	}
+
+	err := json.Unmarshal(r.Body, expectedPayload)
+
+	if err != nil {
+		// TODO: handle bad request
+		fmt.Println("Invalid JSON body", err)
+		return false
+	}
+
+	json.Unmarshal(r.Body, expectedPayload)
+	return true
 }
 
 func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
@@ -48,11 +71,18 @@ func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
 		headers[key] = value
 	}
 
+	// parsing do body
+	var body []byte
+
+	if len(sections) > 1 {
+		body = []byte(sections[1])
+	}
+
 	return &HTTPRequest{
 		Method:  method,
 		Path:    path,
 		Version: version,
 		Headers: headers,
-		Body:    []byte(sections[1]),
+		Body:    body, 
 	}, nil
 }
