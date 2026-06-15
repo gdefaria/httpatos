@@ -7,19 +7,19 @@ import (
 
 type onReceiveCallback func(rawRequest []byte) (rawResponse []byte)
 
-type Listener struct {
+type listener struct {
 	Port      int
 	OnReceive onReceiveCallback
 }
 
-func NewListener(port int, onReceive onReceiveCallback) *Listener {
-	return &Listener{
+func newListener(port int, onReceive onReceiveCallback) *listener {
+	return &listener{
 		Port:      port,
 		OnReceive: onReceive,
 	}
 }
 
-func (l *Listener) handleConnection(conn net.Conn) {
+func (l *listener) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	// max size: 5MB
@@ -38,7 +38,7 @@ func (l *Listener) handleConnection(conn net.Conn) {
 	conn.Write(response)
 }
 
-func (l *Listener) Listen() {
+func (l *listener) listen() {
 	tcpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", l.Port))
 	if err != nil {
 		panic(err)

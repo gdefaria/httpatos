@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type HTTPRequest struct {
+type httpRequest struct {
 	Method  string
 	Path    string
 	Version string
@@ -16,7 +16,7 @@ type HTTPRequest struct {
 }
 
 // Parser de JSON
-func (r *HTTPRequest) JSON(expectedPayload any) (success bool) {
+func (r *httpRequest) JSON(expectedPayload any) (success bool) {
 	contentType := r.Headers["content-type"]
 
 	if contentType != "application/json" {
@@ -37,7 +37,7 @@ func (r *HTTPRequest) JSON(expectedPayload any) (success bool) {
 	return true
 }
 
-func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
+func decodeHttpRequest(request string) (*httpRequest, error) {
 	// separa entre headers e (possivelmente) body
 	sections := strings.Split(request, "\r\n\r\n")
 
@@ -78,7 +78,7 @@ func DecodeHTTPRequest(request string) (*HTTPRequest, error) {
 		body = []byte(sections[1])
 	}
 
-	return &HTTPRequest{
+	return &httpRequest{
 		Method:  method,
 		Path:    path,
 		Version: version,

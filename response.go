@@ -44,7 +44,7 @@ var statusText = map[int]string{
 	504: "Gateway Timeout",
 }
 
-type HTTPResponse struct {
+type httpResponse struct {
 	Version    string
 	Status     int
 	StatusText string
@@ -55,7 +55,7 @@ type HTTPResponse struct {
 	Ready bool
 }
 
-func (r *HTTPResponse) Json(payload any) *HTTPResponse {
+func (r *httpResponse) Json(payload any) *httpResponse {
 	body, _ := json.Marshal(payload)
 
 	r.Headers["Content-Type"] = "application/json"
@@ -64,7 +64,7 @@ func (r *HTTPResponse) Json(payload any) *HTTPResponse {
 	return r
 }
 
-func (r *HTTPResponse) Text(text string) *HTTPResponse {
+func (r *httpResponse) Text(text string) *httpResponse {
 	body := []byte(text)
 
 	r.Headers["Content-Type"] = "text/plain"
@@ -73,7 +73,7 @@ func (r *HTTPResponse) Text(text string) *HTTPResponse {
 	return r
 }
 
-func (r *HTTPResponse) Send(statusCode int) {
+func (r *httpResponse) Send(statusCode int) {
 	var message string
 
 	if text, ok := statusText[statusCode]; ok {
@@ -90,7 +90,7 @@ func (r *HTTPResponse) Send(statusCode int) {
 	r.Ready = true
 }
 
-func (r *HTTPResponse) Serialize() []byte {
+func (r *httpResponse) serialize() []byte {
 	var buf bytes.Buffer
 
 	// status line
@@ -110,8 +110,8 @@ func (r *HTTPResponse) Serialize() []byte {
 	return buf.Bytes()
 }
 
-func NewHTTPResponse() *HTTPResponse {
-	return &HTTPResponse{
+func NewHTTPResponse() *httpResponse {
+	return &httpResponse{
 		Headers: make(map[string]string),
 	}
 }

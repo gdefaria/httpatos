@@ -8,11 +8,11 @@ import (
 var ALLOWED_METHODS = [...]string{"GET", "POST"}
 
 // callback que recebe o contexto da requisição
-type routeCallback func(context *HTTPContext)
+type routeCallback func(context *Context)
 
-type HTTPContext struct {
-	Request  *HTTPRequest
-	Response *HTTPResponse
+type Context struct {
+	Request  *httpRequest
+	Response *httpResponse
 }
 
 /*
@@ -26,27 +26,27 @@ prioridade e só buscamos em paramChild se children[segmento] não existir
 dessa forma, é possível suportar, ao mesmo tempo, rotas como
 /user/:id e /user/profile
 */
-type TrieNode struct {
-	children   map[string]*TrieNode // subrotas literais
-	paramChild *TrieNode            // subrota com o parâmetro
+type trieNode struct {
+	children   map[string]*trieNode // subrotas literais
+	paramChild *trieNode            // subrota com o parâmetro
 	paramName  string               // nome do parâmetro para popular o map de params
 	callback   routeCallback        // callback passado pelo usuário para lidar com a rota
 }
 
 type router struct {
 	// uma árvore para cada método
-	routeTree map[string]*TrieNode
+	routeTree map[string]*trieNode
 }
 
-func NewRouter() *router {
+func Router() *router {
 	r := router{
-		routeTree: make(map[string]*TrieNode),
+		routeTree: make(map[string]*trieNode),
 	}
 
 	// inicializando uma árvore para cada método
 	for _, method := range ALLOWED_METHODS {
-		r.routeTree[method] = &TrieNode{
-			children: make(map[string]*TrieNode),
+		r.routeTree[method] = &trieNode{
+			children: make(map[string]*trieNode),
 		}
 	}
 
@@ -55,7 +55,7 @@ func NewRouter() *router {
 
 /*
 função responsável por mapear a rota+parâmetros na árvore de rotas do método.
-tenha certeza que entendeu a estrutura de TrieNode antes de ler essa função.
+tenha certeza que entendeu a estrutura de trieNode antes de ler essa função.
 você pode me perguntar pessoalmente caso não entenda.
 */
 func (r *router) registerRoute(method string, path string, c routeCallback) {
@@ -93,8 +93,8 @@ func (r *router) registerRoute(method string, path string, c routeCallback) {
 		}
 
 		// não há mais rotas na árvore, mas ainda há segmentos. precisamos começar a criá-las
-		newNode := &TrieNode{
-			children: make(map[string]*TrieNode),
+		newNode := &trieNode{
+			children: make(map[string]*trieNode),
 		}
 
 		if isParam {
@@ -162,7 +162,7 @@ func (r *router) Post(path string, c routeCallback) {
 
 // função principal que recebe uma requisição crua e a direciona
 func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
-	request, err := DecodeHTTPRequest(string(rawRequest))
+	request, err := decodeHttpRequest(string(rawRequest))
 
 	if err != nil {
 		// TODO: Handle bad request
@@ -196,7 +196,7 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	}
 
 	// construindo o contexto
-	c := &HTTPContext{
+	c := &Context{
 		Request:  request,
 		Response: NewHTTPResponse(),
 	}
@@ -206,7 +206,7 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	defer func() {
 		if p := recover(); p != nil {
 			// TODO: Handle internal server error
-			fmt.Println(fmt.Sprintf("[Internal Server Error]: %v", p))
+			fmt.Printf("[Internal Server Error]: %v", p)
 		}
 	}()
 
@@ -214,11 +214,11 @@ func (r *router) receiveRawRequest(rawRequest []byte) (rawResponse []byte) {
 	for !c.Response.Ready {
 	} // espera até que Request.Ready == true
 
-	return c.Response.Serialize()
+	return c.Response.serialize()
 }
 
 // cria um novo listener
 func (r *router) Listen(port int) {
-	listener := NewListener(port, r.receiveRawRequest)
-	listener.Listen()
+	listener := newListener(port, r.receiveRawRequest)
+	listener.listen()
 }
