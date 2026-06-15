@@ -1,3 +1,3 @@
-module github.com/gdefaria/patos-psel/httpatos
+module github.com/gdefaria/httpatos
 
 go 1.26.1
