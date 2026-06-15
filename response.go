@@ -45,14 +45,14 @@ var statusText = map[int]string{
 }
 
 type httpResponse struct {
-	Version    string
-	Status     int
-	StatusText string
+	version    string
+	status     int
+	statusText string
 	Headers    map[string]string
 	Body       []byte
 
 	// listener espera até que Ready == true
-	Ready bool
+	ready bool
 }
 
 func (r *httpResponse) Json(payload any) *httpResponse {
@@ -73,6 +73,11 @@ func (r *httpResponse) Text(text string) *httpResponse {
 	return r
 }
 
+func (r *httpResponse) Status(status int) *httpResponse {
+	r.status = status
+	return r
+}
+
 func (r *httpResponse) Send(statusCode int) {
 	var message string
 
@@ -82,19 +87,19 @@ func (r *httpResponse) Send(statusCode int) {
 		message = "Unknown"
 	}
 
-	r.StatusText = message
-	r.Status = statusCode
+	r.statusText = message
+	r.status = statusCode
 
 	r.Headers["Content-Length"] = strconv.Itoa(len(r.Body))
 
-	r.Ready = true
+	r.ready = true
 }
 
 func (r *httpResponse) serialize() []byte {
 	var buf bytes.Buffer
 
 	// status line
-	fmt.Fprintf(&buf, "HTTP/1.1 %d %s\r\n", r.Status, r.StatusText)
+	fmt.Fprintf(&buf, "HTTP/1.1 %d %s\r\n", r.Status, r.statusText)
 
 	// headers
 	for key, value := range r.Headers {
