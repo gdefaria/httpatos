@@ -55,22 +55,22 @@ type httpResponse struct {
 	ready bool
 }
 
-func (r *httpResponse) Json(payload any) *httpResponse {
+func (r *httpResponse) Json(payload any) {
 	body, _ := json.Marshal(payload)
 
 	r.Headers["Content-Type"] = "application/json"
 	r.Body = body
 
-	return r
+	r.Send()
 }
 
-func (r *httpResponse) Text(text string) *httpResponse {
+func (r *httpResponse) Text(text string) {
 	body := []byte(text)
 
 	r.Headers["Content-Type"] = "text/plain"
 	r.Body = body
 
-	return r
+	r.Send()
 }
 
 func (r *httpResponse) Status(status int) *httpResponse {
